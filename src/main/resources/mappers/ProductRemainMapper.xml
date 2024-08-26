@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.githrd.demo_transaction.dao.ProductRemainMapper">
+
+	<!-- 전체조회 -->
+	<select id="selectList" resultType="product">
+		select * from product_remain order by idx
+	</select>
+	
+	<!-- idx -> 객체 1개 조회 -->
+	<select id="selectOneFromIdx" parameterType="int" resultType="product">
+		select * from product_remain where idx = #{idx}
+	</select>
+	
+	<!-- name -> 객체 1개 조회 -->
+	<select id="selectOneFromName" parameterType="String" resultType="product">
+		select * from product_remain where name = #{name}
+	</select>
+
+	<!-- 추가 -->
+	<insert id="insert" parameterType="product">
+		insert into product_remain values(seq_product_remain_idx.nextVal, #{name}, #{cnt}, sysdate)
+	</insert>
+	
+	<!-- 수정 -->
+	<update id="update" parameterType="product">
+		update product_remain 
+			set cnt = #{cnt}, regdate = sysdate
+		where idx = #{idx}
+	</update>
+	
+	<!-- 삭제 -->
+	<delete id="delete" parameterType="int">
+		delete from product_remain where idx = #{idx}
+	</delete>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
