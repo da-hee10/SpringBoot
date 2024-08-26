@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <!--Bootstrap 3.x -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <style>
+        #box{
+            width: 800px;
+            margin: auto;
+            margin-top: 50px;
+        }
+        h1{
+            text-align: center;
+            font-size: 28px;
+            color: green;
+            text-shadow: 1px 1px 1px black;
+        }
+        a{
+            font-size: 22px;
+            font-weight: bold;
+            text-decoration: none !important;
+            margin-right: 50px;
+        }
+        a:hover{
+            color: red;
+        }
+        nav{
+            text-align: center;
+        }
+        hr{
+            color: skyblue !important;
+        }
+        th,td{
+            text-align: center;
+            vertical-align: middle !important;
+        }
+    </style>
+</head>
+
+<script>
+    
+    $(document).ready(function(){
+        dept_list();
+     });
+
+     function dept_list(){
+
+        //Ajax : Rest API
+        $.ajax({
+            url         : "/depts",
+            dataType    : "json",
+            success     : function(res_data){
+                let dept_array = res_data;
+
+                let html = 
+                    `<table class="table">
+                        <tr class="success">
+                            <th>부서번호</th>
+                            <th>부서명</th>
+                            <th>위치</th>
+                            <th>편집</th>
+                        </tr>
+                    `;
+                // Data 넣는 코드
+                // for (Dept dept : dept_array)
+                for(let dept of dept_array){
+                    html += 
+                        `
+                            <tr>
+                                <td>${dept.deptno}</td>    
+                                <td>${dept.dname}</td>  
+                                <td>${dept.loc}</td>  
+                                <td>
+                                    <input class="btn btn-info" type="button" value="수정" onclick="dept_modify_form('${dept.deptno}');">
+                                    <input class="btn btn-danger" type="button" value="삭제" onclick="dept_delete('${dept.deptno}');">
+                                </td>  
+                            </tr>
+                        `;
+                }
+
+                // 마무리 코드
+                html += `<table>`;
+                
+                $("#root").html(html)
+            },
+            error       : function(err){
+                alert(err.reponseText);
+            }
+        });
+    }   // end : dept_list()
+
+    // 등록폼 띄우기
+    function dept_form(){
+
+        let html = 
+            `
+                <div class="panel panel-primary">
+                    <div class="panel-heading">부서등록</div>
+                    <div class="panel-body">
+                        <div style="margin-bottom : 30px;">
+                            부서번호:
+                            <input class="form-control" id="deptno">
+                        </div>
+                        <div style="margin-bottom : 30px;">
+                            부서명:
+                            <input class="form-control" id="dname">
+                        </div>
+                        <div style="margin-bottom : 30px;">
+                            부서위치:
+                            <input class="form-control" id="loc">
+                        </div>
+                        <div>
+                            <input class="btn btn-primary" type="button" value="등록하기" onclick="dept_insert();">
+                        </div>
+                    </div>
+                </div>
+            `;
+
+        $("#root").html(html);
+    }   // end : dept_form()
+
+    const regular_number = /^[0-9]{1,6}$/;
+
+    function dept_insert(){
+        
+        let deptno   = $("#deptno").val().trim();
+        let dname   = $("#dname").val().trim();
+        let loc     = $("#loc").val().trim();
+
+        if(regular_number.test(deptno) == false){
+            alert("부서번호는 2~6자리 숫자만 입력하세요");
+            $("#deptno").val("");
+            $("#deptno").focus();
+            return;
+        }
+        if(dname == ""){
+            alert("부서명을 입력하세요");
+            $("#dname").val("");
+            $("#dname").focus();
+            return;
+        }
+        if(loc == ""){
+            alert("부서위치를 입력하세요");
+            $("#loc").val("");
+            $("#loc").focus();
+            return;
+        }
+
+        // Ajax 통해서 insert : POST    /dept   {"deptno": 60, "dname" : "해외영업부", "loc" : "601"}
+        let dept = `{"deptno" : ${deptno}, "dname" : "${dname}", "loc" : "${loc}"}`;
+        $.ajax({
+            type        : "POST",
+            contentType : "application/json",
+            url         : "/dept",
+            data        : dept,
+            dataType    : "json",
+            success     : function(res_data){
+                // res_data = {"result" : true} or {"result" : false}
+                if(res_data.result == false){
+                    alert("등록실패");
+                    return;
+                }
+
+                alert("부서 등록 성공");
+                dept_list();
+            },
+            error       : function(err){
+                alert(err.responseText);
+            }
+        });
+
+    }   // end : dept_insert()
+
+    function dept_delete(deptno){
+        
+        if(confirm(deptno + "부서를 정말 삭제하시겠습니까?") == false) return;
+
+        // Ajax 이용해서 삭제처리
+        // method = "Delete"
+        // uri = "dept/10"
+        $.ajax({
+            type        : "DELETE",
+            url         : "/dept/" + deptno,
+            dataType    : "json",
+            success     : function(res_data){
+                if(res_data.result == false){
+                    alert("삭제실패");
+                    return;
+                }
+
+                alert("부서 삭제 성공");
+                dept_list();
+            },
+            error       : function(err){
+                alert(err.reponseText);
+            }
+        });
+    }   // end : dept_delete()
+
+    // 수정폼 띄우기
+    function dept_modify_form(deptno){
+
+        // deptno에 해당되는 데이터 1건 가져오기
+        $.ajax({
+            type        : "GET",
+            url         : `/dept/${deptno}`,
+            dataType    : "json",
+            success     : function(res_data){
+                //res_data = {"deptno" : 10, "dname" : "총무부", "loc" : "101"}
+                let html = 
+                    `
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">부서수정</div>
+                            <div class="panel-body">
+                                <div style="margin-bottom: 30px;">
+                                    부서번호:
+                                    <input class="form-control" id="modify_deptno" value="${res_data.deptno}">
+                                </div>
+                                <div style="margin-bottom: 30px;">
+                                    부서명:
+                                    <input class="form-control" id="modify_dname" value="${res_data.dname}">
+                                </div>
+                                <div style="margin-bottom: 30px;">
+                                    부서위치:
+                                    <input class="form-control" id="modify_loc" value="${res_data.loc}">
+                                </div>
+                                <div>
+                                    <input class="btn btn-info" type="button" value="목록으로" onclick="dept_list();">
+                                    <input class="btn btn-primary" type="button" value="수정하기" onclick="dept_modify();">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                $("#root").html(html);
+            },
+            error       : function(err){
+                alert(err.responseText);
+            }
+        });
+    }   // end : dept_modify_from()
+
+    // 수정
+    function dept_modify(){
+
+        let deptno   = $("#modify_deptno").val().trim();
+        let dname   = $("#modify_dname").val().trim();
+        let loc     = $("#modify_loc").val().trim();
+
+        if(regular_number.test(deptno) == false){
+            alert("부서번호는 2~6자리 숫자만 입력하세요");
+            $("#modify_deptno").val("");
+            $("#modify_deptno").focus();
+            return;
+        }
+        if(dname == ""){
+            alert("부서명을 입력하세요");
+            $("#modify_dname").val("");
+            $("#modify_dname").focus();
+            return;
+        }
+        if(loc == ""){
+            alert("부서위치를 입력하세요");
+            $("#modify_loc").val("");
+            $("#modify_loc").focus();
+            return;
+        }
+
+        let dept = `{"deptno" : ${deptno}, "dname" : "${dname}", "loc" : "${loc}"}`;
+        $.ajax({
+            type        : "PUT",
+            contentType : "application/json",
+            url         : "/dept",
+            data        : dept,
+            dataType    : "json",
+            success     : function(res_data){
+                // res_data = {"result" : true} or {"result" : false}
+                if(res_data.result == false){
+                    alert("수정실패");
+                    return;
+                }
+
+                alert("부서 수정 성공");
+                dept_list();
+            },
+            error       : function(err){
+                alert(err.responseText);
+            }
+        });
+
+    }
+</script>
+
+<body>
+    <div id="box">
+        <h1>부서정보</h1>
+        <hr>
+        <!-- Menu -->
+        <nav>
+            <a href="#" onclick="dept_list();">목록보기</a>
+            <a href="#" onclick="dept_form();">부서등록</a>
+        </nav>
+        <hr>
+        <div id="root"></div>
+    </div>
+</body>
+</html>
