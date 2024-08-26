@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<!--  Bootstrap  3.x  -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+<style type="text/css">
+
+   #box{
+      width: 1200px;
+      margin: auto;
+      margin-top: 50px;
+   }
+
+</style>
+
+<script type="text/javascript">
+
+    
+  function search_all(){
+	  
+      const deptno 			= $("#deptno").val();
+	  const sajob  			= $("#sajob").val();
+	  const sasex  			= $("#sasex").val();
+	  const hire_year_10 	= $("#hire_year_10").val();
+	  
+	  
+	  //Ajax로 요청
+	  $.ajax({
+		  url		:	"sawon/list_condition.do",                        // SawonListConditionAction  
+		  data		:	{
+			              "deptno":deptno,
+			              "sajob":sajob, 
+			              "sasex":sasex,
+			              "hire_year_10": hire_year_10
+			            },   // sawon/list_condition.do?deptno=10&sajob=과장&sasex=남자&hire_year_10=1990
+		  success	:	function(res_data){
+			  
+			  $("#disp").html(res_data);
+		  },
+		  error		:	function(err){
+			  alert(err.responseText);
+		  }
+	  });
+  }//end:serach_all()
+  
+  
+
+</script>
+
+
+</head>
+<body>
+<div id="box">
+<form class="form-inline">
+   
+   부서번호:<select class="form-control" id="deptno">
+                <option value="0">전체보기</option>
+                <option value="10">10번부서</option>
+                <option value="20">20번부서</option>
+                <option value="30">30번부서</option>
+                <option value="40">40번부서</option>
+            </select>
+          
+    
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    
+    직급:<select class="form-control" id="sajob">
+                <option value="all">전체보기</option>
+                <option value="부장">부장</option>
+                <option value="과장">과장</option>
+                <option value="대리">대리</option>
+                <option value="사원">사원</option>
+                <option value="알바">알바</option>
+            </select>
+               
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    
+    성별:<select class="form-control" id="sasex">
+             <option value="all">전체</option>
+             <option value="남자">남자</option>
+             <option value="여자">여자</option>  
+         </select>
+    
+    
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    
+    입사년대:<select class="form-control" id="hire_year_10">
+                 <option value="0">전체</option>
+                 <option value="1980">1980년대</option>
+                 <option value="1990">1990년대</option>
+                 <option value="2000">2000년대</option>
+                 <option value="2020">2020년대</option>    
+             </select>
+    
+    
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    
+    <input type="button"  class="btn btn-info"  value="검색" onclick="search_all();"> 
+            
+    <hr>
+    <div id="disp"></div>
+             
+</form>
+</div>
+
+</body>
+</html>

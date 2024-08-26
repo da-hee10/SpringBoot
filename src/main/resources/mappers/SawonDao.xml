@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.githrd.demo_mybatis.dao.SawonDao">
+
+   <select id="selectList"  parameterType="Map"  resultType="sawon">
+       select * from sawon
+       <!-- 검색조건 추가 -->
+       <trim prefix="where"  prefixOverrides="and">
+          
+          <!-- 부서검색 -->
+          <if test="deptno!=null">
+             deptno = #{ deptno }
+          </if>
+          
+          <!-- 직급검색 -->
+          <if test="sajob!=null">
+             and sajob=#{ sajob }
+          </if>
+          
+          <!-- 성별검색 -->
+          <if test="sasex!=null">
+             and sasex=#{ sasex }
+          </if>
+          
+          <!-- 입사년대별 -->
+          <if test="hire_year_10!=null">
+              and  floor(to_number(to_char(sahire,'YYYY'))/10)*10 = #{ hire_year_10 }
+          </if>
+       
+       </trim>
+
+   </select>
+
+   
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
